@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   ChatComponent,
@@ -7,11 +7,12 @@ import {
   MessageActionEvent,
 } from 'ngx-chat';
 import { ChatStateService, ActivityLogEntry } from './services/chat-state.service';
+import { PreviewComponent } from './components/preview/preview.component';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChatComponent, ChatHeaderContentDirective, FormsModule],
+  imports: [ChatComponent, ChatHeaderContentDirective, FormsModule, PreviewComponent],
   template: `
     <div class="app-container">
       <ngx-chat
@@ -50,6 +51,11 @@ import { ChatStateService, ActivityLogEntry } from './services/chat-state.servic
           </div>
         </ng-template>
       </ngx-chat>
+
+      <app-preview
+        #preview
+        (urlChange)="onPreviewUrlChange($event)"
+      />
 
       <div class="sidebar">
         <h3 class="sidebar-title">Settings</h3>
@@ -135,14 +141,18 @@ import { ChatStateService, ActivityLogEntry } from './services/chat-state.servic
 
     .app-container {
       display: grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: minmax(350px, 450px) 1fr 320px;
       height: 100%;
       background-color: #f5f5f5;
     }
 
     ngx-chat {
       height: 100%;
-      border-right: 1px solid #e0e0e0;
+      border-right: none;
+    }
+
+    app-preview {
+      height: 100%;
     }
 
     .header-content {
@@ -438,12 +448,22 @@ import { ChatStateService, ActivityLogEntry } from './services/chat-state.servic
       color: #374151;
     }
 
+    @media (max-width: 1024px) {
+      .app-container {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+    }
+
     @media (max-width: 768px) {
       .app-container {
         grid-template-columns: 1fr;
       }
 
-      .sidebar {
+      app-preview {
         display: none;
       }
     }
@@ -451,6 +471,7 @@ import { ChatStateService, ActivityLogEntry } from './services/chat-state.servic
 })
 export class App {
   protected readonly chatState = inject(ChatStateService);
+  private readonly previewComponent = viewChild<PreviewComponent>('preview');
 
   protected onSend(event: ChatSendEvent): void {
     this.chatState.sendMessage(event.content);
@@ -507,5 +528,14 @@ export class App {
       minute: '2-digit',
       second: '2-digit',
     });
+  }
+
+  protected onPreviewUrlChange(url: string): void {
+    console.log('Preview URL changed:', url);
+  }
+
+  /** Refresh the preview iframe - can be called when code changes */
+  refreshPreview(): void {
+    this.previewComponent()?.triggerRefresh();
   }
 }
