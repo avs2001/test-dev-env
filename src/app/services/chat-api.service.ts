@@ -2,8 +2,8 @@ import { Injectable, signal, computed, inject, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, firstValueFrom } from 'rxjs';
 
-/** API base URL */
-const API_BASE_URL = 'http://localhost:3000/api';
+/** API base URL - uses proxy in dev, can be configured for prod */
+const API_BASE_URL = '/api';
 
 /** Request to send a chat message */
 export interface SendMessageRequest {
@@ -19,12 +19,41 @@ export interface SendMessageResponse {
   messageId: string;
 }
 
+/** SSE event types from the API */
+export type ChatEventType =
+  // Message lifecycle
+  | 'started'
+  | 'completed'
+  | 'error'
+  // Agent task events
+  | 'task_started'
+  | 'task_progress'
+  | 'task_output'
+  | 'task_completed'
+  | 'task_failed'
+  | 'task_cancelled'
+  // Tool events
+  | 'tool_call'
+  | 'tool_result'
+  // Subagent events
+  | 'subagent_start'
+  | 'subagent_stop'
+  // Routing
+  | 'routing_decision'
+  // Legacy aliases
+  | 'progress'
+  | 'output'
+  | 'tool'
+  | 'agent_event';
+
 /** SSE event from the API */
 export interface ChatApiEvent {
-  type: 'started' | 'progress' | 'output' | 'tool' | 'completed' | 'error' | 'agent_event';
+  type: ChatEventType;
   conversationId?: string;
   messageId?: string;
+  taskId?: string;
   agentId?: string;
+  agentName?: string;
   content?: string;
   error?: string;
   data?: Record<string, unknown>;
@@ -60,7 +89,9 @@ export class ChatApiService {
   readonly events$ = this.eventsSubject.asObservable();
 
   /** Current connection status */
-  private readonly connectionStatusSignal = signal<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  private readonly connectionStatusSignal = signal<'disconnected' | 'connecting' | 'connected'>(
+    'disconnected'
+  );
   readonly connectionStatus = this.connectionStatusSignal.asReadonly();
 
   /** Whether currently connected to SSE stream */
@@ -111,14 +142,40 @@ export class ChatApiService {
       });
     };
 
-    // Handle specific event types
-    const eventTypes = ['started', 'progress', 'output', 'tool', 'completed', 'error', 'agent_event'];
+    // Handle all event types from the API
+    const eventTypes: ChatEventType[] = [
+      // Message lifecycle
+      'started',
+      'completed',
+      'error',
+      // Agent task events
+      'task_started',
+      'task_progress',
+      'task_output',
+      'task_completed',
+      'task_failed',
+      'task_cancelled',
+      // Tool events
+      'tool_call',
+      'tool_result',
+      // Subagent events
+      'subagent_start',
+      'subagent_stop',
+      // Routing
+      'routing_decision',
+      // Legacy aliases
+      'progress',
+      'output',
+      'tool',
+      'agent_event',
+    ];
+
     for (const type of eventTypes) {
       this.eventSource.addEventListener(type, (event: MessageEvent) => {
         this.ngZone.run(() => {
           try {
             const data = JSON.parse(event.data) as ChatApiEvent;
-            this.eventsSubject.next({ ...data, type: type as ChatApiEvent['type'] });
+            this.eventsSubject.next({ ...data, type });
           } catch {
             // Ignore parse errors
           }
