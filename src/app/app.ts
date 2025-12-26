@@ -6,7 +6,7 @@ import {
   ChatSendEvent,
   MessageActionEvent,
 } from 'ngx-chat';
-import { ChatStateService } from './services/chat-state.service';
+import { ChatStateService, ActivityLogEntry } from './services/chat-state.service';
 
 @Component({
   selector: 'app-root',
@@ -67,10 +67,50 @@ import { ChatStateService } from './services/chat-state.service';
           <span class="form-hint">Directory where agents can operate</span>
         </div>
 
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              [checked]="chatState.verboseMode()"
+              (change)="toggleVerboseMode()"
+            />
+            <span>Verbose Mode (show all SSE events)</span>
+          </label>
+        </div>
+
         <div class="actions">
           <button class="btn btn--secondary" (click)="clearChat()">
             Clear Chat
           </button>
+          @if (chatState.isProcessing()) {
+            <button class="btn btn--danger" (click)="cancelTask()">
+              Cancel Task
+            </button>
+          }
+        </div>
+
+        @if (chatState.currentAgent()) {
+          <div class="current-agent">
+            <span class="agent-badge">🤖 {{ chatState.currentAgent() }}</span>
+          </div>
+        }
+
+        <div class="activity-section">
+          <div class="activity-header">
+            <h4>Activity Log</h4>
+            <button class="btn-link" (click)="clearActivityLog()">Clear</button>
+          </div>
+          <div class="activity-log">
+            @for (entry of chatState.activityLog(); track entry.id) {
+              <div class="activity-entry" [class]="'activity-entry--' + entry.type">
+                <span class="activity-icon">{{ getActivityIcon(entry.type) }}</span>
+                <span class="activity-time">{{ formatTime(entry.timestamp) }}</span>
+                <span class="activity-message">{{ entry.message }}</span>
+              </div>
+            } @empty {
+              <div class="activity-empty">No activity yet</div>
+            }
+          </div>
         </div>
 
         <div class="agent-info">
@@ -95,7 +135,7 @@ import { ChatStateService } from './services/chat-state.service';
 
     .app-container {
       display: grid;
-      grid-template-columns: 1fr 280px;
+      grid-template-columns: 1fr 320px;
       height: 100%;
       background-color: #f5f5f5;
     }
@@ -160,7 +200,7 @@ import { ChatStateService } from './services/chat-state.service';
     .sidebar {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
       padding: 16px;
       background-color: #ffffff;
       overflow-y: auto;
@@ -204,6 +244,21 @@ import { ChatStateService } from './services/chat-state.service';
       color: #6b7280;
     }
 
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      color: #374151;
+      cursor: pointer;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
     .actions {
       display: flex;
       gap: 8px;
@@ -228,9 +283,139 @@ import { ChatStateService } from './services/chat-state.service';
       background-color: #e5e7eb;
     }
 
+    .btn--danger {
+      background-color: #fee2e2;
+      color: #dc2626;
+    }
+
+    .btn--danger:hover {
+      background-color: #fecaca;
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: #3b82f6;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+
+    .current-agent {
+      padding: 8px;
+      background-color: #eff6ff;
+      border-radius: 6px;
+    }
+
+    .agent-badge {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #1d4ed8;
+    }
+
+    .activity-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 150px;
+      max-height: 300px;
+    }
+
+    .activity-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .activity-header h4 {
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .activity-log {
+      flex: 1;
+      overflow-y: auto;
+      background-color: #1e1e1e;
+      border-radius: 6px;
+      padding: 8px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.7rem;
+      line-height: 1.4;
+    }
+
+    .activity-entry {
+      display: flex;
+      gap: 6px;
+      padding: 2px 0;
+      color: #d4d4d4;
+    }
+
+    .activity-entry--routing {
+      color: #c586c0;
+    }
+
+    .activity-entry--agent_start {
+      color: #4ec9b0;
+    }
+
+    .activity-entry--agent_complete {
+      color: #6a9955;
+    }
+
+    .activity-entry--tool_call {
+      color: #dcdcaa;
+    }
+
+    .activity-entry--tool_result {
+      color: #9cdcfe;
+    }
+
+    .activity-entry--subagent_start,
+    .activity-entry--subagent_stop {
+      color: #ce9178;
+    }
+
+    .activity-entry--progress {
+      color: #808080;
+    }
+
+    .activity-entry--error {
+      color: #f14c4c;
+    }
+
+    .activity-entry--info {
+      color: #569cd6;
+    }
+
+    .activity-icon {
+      flex-shrink: 0;
+    }
+
+    .activity-time {
+      flex-shrink: 0;
+      color: #6a9955;
+    }
+
+    .activity-message {
+      word-break: break-word;
+    }
+
+    .activity-empty {
+      color: #6b7280;
+      text-align: center;
+      padding: 16px;
+      font-style: italic;
+    }
+
     .agent-info {
-      margin-top: auto;
-      padding-top: 16px;
+      padding-top: 12px;
       border-top: 1px solid #e5e7eb;
     }
 
@@ -272,7 +457,6 @@ export class App {
   }
 
   protected onAction(event: MessageActionEvent): void {
-    // Handle action events if needed
     console.log('Action:', event);
   }
 
@@ -284,7 +468,44 @@ export class App {
     this.chatState.setWorkingDirectory(directory);
   }
 
+  protected toggleVerboseMode(): void {
+    this.chatState.toggleVerboseMode();
+  }
+
   protected clearChat(): void {
     this.chatState.clearChat();
+  }
+
+  protected cancelTask(): void {
+    this.chatState.cancelCurrentTask();
+  }
+
+  protected clearActivityLog(): void {
+    this.chatState.clearActivityLog();
+  }
+
+  protected getActivityIcon(type: string): string {
+    const icons: Record<string, string> = {
+      routing: '🔀',
+      agent_start: '🤖',
+      agent_complete: '✅',
+      tool_call: '🔧',
+      tool_result: '📋',
+      subagent_start: '👥',
+      subagent_stop: '👤',
+      progress: '⏳',
+      error: '❌',
+      info: 'ℹ️',
+    };
+    return icons[type] ?? '•';
+  }
+
+  protected formatTime(date: Date): string {
+    return date.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
   }
 }
