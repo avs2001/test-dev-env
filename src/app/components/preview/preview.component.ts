@@ -1,13 +1,16 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
+  inject,
   input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-preview',
@@ -75,11 +78,11 @@ import { FormsModule } from '@angular/forms';
         </div>
       </div>
       <div class="preview-content">
-        @if (currentUrl()) {
+        @if (safeCurrentUrl(); as safeUrl) {
           <iframe
             #previewFrame
             class="preview-iframe"
-            [src]="currentUrl()"
+            [src]="safeUrl"
             title="Application Preview"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
           ></iframe>
@@ -234,7 +237,14 @@ export class PreviewComponent {
   protected readonly urlInput = signal('http://localhost:4200');
   protected readonly currentUrl = signal('');
 
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly previewFrame = viewChild<ElementRef<HTMLIFrameElement>>('previewFrame');
+
+  protected readonly safeCurrentUrl = computed<SafeResourceUrl | null>(() => {
+    const url = this.currentUrl();
+    if (!url) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  });
 
   constructor() {
     // Initialize with input if provided
