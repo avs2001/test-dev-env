@@ -6,7 +6,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChatMessageActionsComponent } from '../chat-message-actions/chat-message-actions.component';
 import { ChatConfigService } from '../../services/chat-config.service';
 import { CHAT_I18N } from '../../models/i18n.model';
@@ -20,7 +20,7 @@ import { messageEnterAnimation } from '../../animations/chat.animations';
 @Component({
   selector: 'ngx-chat-message-bubble',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, NgTemplateOutlet, ChatMessageActionsComponent],
+  imports: [DatePipe, ChatMessageActionsComponent],
   animations: [messageEnterAnimation],
   host: {
     class: 'ngx-chat-message-bubble',
