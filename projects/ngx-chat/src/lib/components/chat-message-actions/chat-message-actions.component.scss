@@ -1,0 +1,212 @@
+:host {
+  display: block;
+  margin-top: var(--ngx-chat-spacing-sm, 8px);
+}
+
+.ngx-chat-message-actions__container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ngx-chat-spacing-sm, 8px);
+}
+
+.ngx-chat-message-actions__label {
+  display: block;
+  font-size: var(--ngx-chat-font-size-sm, 12px);
+  font-weight: 500;
+  color: inherit;
+  opacity: 0.8;
+  margin-bottom: var(--ngx-chat-spacing-xs, 4px);
+}
+
+.ngx-chat-message-actions__response {
+  font-size: var(--ngx-chat-font-size-sm, 12px);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+// Confirm action
+.ngx-chat-message-actions__confirm {
+  display: flex;
+  gap: var(--ngx-chat-spacing-sm, 8px);
+  flex-wrap: wrap;
+}
+
+// Select action
+.ngx-chat-message-actions__select {
+  display: flex;
+  flex-direction: column;
+}
+
+// Multi-select action
+.ngx-chat-message-actions__multi-select {
+  display: flex;
+  flex-direction: column;
+}
+
+.ngx-chat-message-actions__submit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ngx-chat-spacing-sm, 8px);
+  margin-top: var(--ngx-chat-spacing-sm, 8px);
+}
+
+.ngx-chat-message-actions__count {
+  font-size: var(--ngx-chat-font-size-sm, 12px);
+  color: inherit;
+  opacity: 0.7;
+}
+
+// Options list
+.ngx-chat-message-actions__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ngx-chat-spacing-xs, 4px);
+}
+
+.ngx-chat-message-actions__option {
+  padding: var(--ngx-chat-spacing-xs, 4px) var(--ngx-chat-spacing-sm, 8px);
+  font-family: inherit;
+  font-size: var(--ngx-chat-font-size-sm, 12px);
+  color: inherit;
+  background-color: rgb(0 0 0 / 0.1);
+  border: 1px solid transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  transition:
+    background-color var(--ngx-chat-animation-duration-fast, 150ms) ease,
+    border-color var(--ngx-chat-animation-duration-fast, 150ms) ease;
+
+  &:hover:not(:disabled) {
+    background-color: rgb(0 0 0 / 0.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--selected {
+    background-color: rgb(0 0 0 / 0.2);
+    border-color: currentColor;
+  }
+}
+
+// Buttons action
+.ngx-chat-message-actions__buttons {
+  display: flex;
+  gap: var(--ngx-chat-spacing-sm, 8px);
+
+  &--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  &--vertical {
+    flex-direction: column;
+  }
+
+  &--grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+}
+
+// Button styles
+.ngx-chat-message-actions__btn {
+  padding: var(--ngx-chat-spacing-sm, 8px) var(--ngx-chat-spacing-md, 16px);
+  font-family: inherit;
+  font-size: var(--ngx-chat-font-size-sm, 12px);
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background-color var(--ngx-chat-animation-duration-fast, 150ms) ease,
+    opacity var(--ngx-chat-animation-duration-fast, 150ms) ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--ngx-chat-self-bg, #3b82f6);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    color: var(--ngx-chat-self-color, #ffffff);
+    background-color: var(--ngx-chat-self-bg, #3b82f6);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--ngx-chat-self-bg, #3b82f6), black 10%);
+    }
+  }
+
+  &--secondary {
+    color: var(--ngx-chat-other-color, #1f2937);
+    background-color: var(--ngx-chat-other-bg, #f3f4f6);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--ngx-chat-other-bg, #f3f4f6), black 5%);
+    }
+  }
+
+  &--danger {
+    color: #ffffff;
+    background-color: var(--ngx-chat-error-color, #ef4444);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--ngx-chat-error-color, #ef4444), black 10%);
+    }
+  }
+
+  &--ghost {
+    color: var(--ngx-chat-other-color, #1f2937);
+    background-color: transparent;
+    border: 1px solid var(--ngx-chat-border, #e5e7eb);
+
+    &:hover:not(:disabled) {
+      background-color: var(--ngx-chat-other-bg, #f3f4f6);
+    }
+  }
+}
+
+// Context-aware styling for actions inside self messages
+:host-context(.ngx-chat-message-bubble--self) {
+  .ngx-chat-message-actions__option {
+    background-color: rgb(255 255 255 / 0.2);
+
+    &:hover:not(:disabled) {
+      background-color: rgb(255 255 255 / 0.3);
+    }
+
+    &--selected {
+      background-color: rgb(255 255 255 / 0.4);
+    }
+  }
+
+  .ngx-chat-message-actions__btn--secondary {
+    color: var(--ngx-chat-self-color, #ffffff);
+    background-color: rgb(255 255 255 / 0.2);
+
+    &:hover:not(:disabled) {
+      background-color: rgb(255 255 255 / 0.3);
+    }
+  }
+
+  .ngx-chat-message-actions__btn--ghost {
+    color: var(--ngx-chat-self-color, #ffffff);
+    border-color: rgb(255 255 255 / 0.5);
+
+    &:hover:not(:disabled) {
+      background-color: rgb(255 255 255 / 0.1);
+    }
+  }
+}

@@ -1,0 +1,128 @@
+:host {
+  // Colors
+  --ngx-chat-bg: #ffffff;
+  --ngx-chat-border: #e5e7eb;
+  --ngx-chat-self-bg: #3b82f6;
+  --ngx-chat-self-color: #ffffff;
+  --ngx-chat-other-bg: #f3f4f6;
+  --ngx-chat-other-color: #1f2937;
+  --ngx-chat-system-bg: transparent;
+  --ngx-chat-system-color: #6b7280;
+  --ngx-chat-error-color: #ef4444;
+  --ngx-chat-success-color: #10b981;
+
+  // Input
+  --ngx-chat-input-bg: #ffffff;
+  --ngx-chat-input-color: #1f2937;
+  --ngx-chat-input-border: #d1d5db;
+  --ngx-chat-input-placeholder: #9ca3af;
+  --ngx-chat-input-focus-border: #3b82f6;
+
+  // Spacing
+  --ngx-chat-spacing-xs: 4px;
+  --ngx-chat-spacing-sm: 8px;
+  --ngx-chat-spacing-md: 16px;
+  --ngx-chat-spacing-lg: 24px;
+
+  // Sizing
+  --ngx-chat-bubble-radius: 16px;
+  --ngx-chat-bubble-max-width: 80%;
+  --ngx-chat-avatar-size: 32px;
+  --ngx-chat-header-height: 56px;
+  --ngx-chat-sender-min-height: 56px;
+
+  // Typography
+  --ngx-chat-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ngx-chat-font-size: 14px;
+  --ngx-chat-font-size-sm: 12px;
+  --ngx-chat-line-height: 1.5;
+
+  // Animation
+  --ngx-chat-animation-duration-fast: 150ms;
+  --ngx-chat-animation-duration-normal: 200ms;
+  --ngx-chat-animation-duration-slow: 300ms;
+  --ngx-chat-animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Shadows
+  --ngx-chat-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --ngx-chat-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  font-family: var(--ngx-chat-font-family);
+  font-size: var(--ngx-chat-font-size);
+  line-height: var(--ngx-chat-line-height);
+  color: var(--ngx-chat-other-color);
+  background-color: var(--ngx-chat-bg);
+  container-type: inline-size;
+  container-name: ngx-chat;
+}
+
+// Dark theme
+:host(.ngx-chat--dark) {
+  --ngx-chat-bg: #1f2937;
+  --ngx-chat-border: #374151;
+  --ngx-chat-self-bg: #2563eb;
+  --ngx-chat-self-color: #ffffff;
+  --ngx-chat-other-bg: #374151;
+  --ngx-chat-other-color: #f9fafb;
+  --ngx-chat-system-color: #9ca3af;
+  --ngx-chat-input-bg: #111827;
+  --ngx-chat-input-color: #f9fafb;
+  --ngx-chat-input-border: #4b5563;
+  --ngx-chat-input-placeholder: #6b7280;
+}
+
+// RTL support
+:host(.ngx-chat--rtl) {
+  direction: rtl;
+}
+
+.ngx-chat__container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--ngx-chat-border);
+  border-radius: 8px;
+}
+
+// Drop zone styles
+:host ::ng-deep .ngx-chat-drop-zone {
+  position: relative;
+
+  &--active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgb(59 130 246 / 0.1);
+    border: 2px dashed var(--ngx-chat-self-bg);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 100;
+  }
+}
+
+// Container query breakpoints
+@container ngx-chat (max-width: 320px) {
+  :host {
+    --ngx-chat-bubble-max-width: 90%;
+    --ngx-chat-spacing-md: 12px;
+  }
+}
+
+@container ngx-chat (min-width: 480px) {
+  :host {
+    --ngx-chat-bubble-max-width: 75%;
+  }
+}
+
+@container ngx-chat (min-width: 768px) {
+  :host {
+    --ngx-chat-bubble-max-width: 65%;
+  }
+}
