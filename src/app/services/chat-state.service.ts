@@ -575,7 +575,7 @@ export class ChatStateService {
 
           // Summarize output for display
           let outputSummary = '';
-          if (output) {
+          if (output && typeof output === 'string') {
             const lines = output.split('\n').length;
             const chars = output.length;
             if (chars > 100) {
